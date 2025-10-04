@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Sendec Shell</title>
+  <style>body{font-family:sans-serif;margin:20px} .comp{padding:8px;border:1px solid #ddd;margin:6px 0;border-radius:6px}</style>
+</head>
+<body>
+  <div id="app">Loading protected Sendec...</div>
+  <script>
+  async function hexToBuf(hex){
+    return new Uint8Array(hex.match(/.{1,2}/g).map(h=>parseInt(h,16))).buffer;
+  }
+  async function fetchAndRender(){
+    const clientId = localStorage.getItem('sendec_client') || ('c'+Math.floor(Math.random()*1e9));
+    localStorage.setItem('sendec_client', clientId);
+
+    const r = await fetch('http://127.0.0.1:3000/get-ephemeral?clientId='+clientId);
+    if(!r.ok){ document.getElementById('app').innerText='Access denied or rate limited'; return; }
+    const jr = await r.json();
+    const token = jr.token;
+
+    const enc = await fetch('http://127.0.0.1:3000/page.sym.enc').then(r=>r.arrayBuffer());
+
+    const keyResp = await fetch('http://127.0.0.1:3000/fetch-key?token='+token);
+    if(!keyResp.ok){ document.getElementById('app').innerText='Key fetch failed'; return; }
+    const { key } = await keyResp.json();
+    const keyBuf = await hexToBuf(key);
+
+    const iv = enc.slice(0,12);
+    const tag = enc.slice(12,28);
+    const cipher = enc.slice(28);
+    const cipherAndTag = new Uint8Array(cipher.byteLength + tag.byteLength);
+    cipherAndTag.set(new Uint8Array(cipher), 0);
+    cipherAndTag.set(new Uint8Array(tag), cipher.byteLength);
+
+    try{
+      const cryptoKey = await crypto.subtle.importKey('raw', keyBuf, 'AES-GCM', false, ['decrypt']);
+      const plain = await crypto.subtle.decrypt({name:'AES-GCM', iv:iv, tagLength:128}, cryptoKey, cipherAndTag);
+      const decoder = new TextDecoder();
+      const symSequence = decoder.decode(plain);
+
+      const interpResp = await fetch('http://127.0.0.1:3000/interpret', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ token, sequence: symSequence })
+      });
+      if(!interpResp.ok){
+        const txt = await interpResp.text();
+        document.getElementById('app').innerText = 'Interpret failed: ' + txt;
+        return;
+      }
+      const { blueprint } = await interpResp.json();
+
+      const container = document.createElement('div');
+      blueprint.forEach(item => {
+        if(item.type === 'component' && item.name === 'header'){
+          const h = document.createElement('h1'); h.textContent = 'Sendec (Protected)'; h.className='comp'; container.appendChild(h);
+        } else if(item.type === 'component' && item.name === 'chatBox'){
+          const p = document.createElement('div'); p.textContent = '[ChatBox Component]'; p.className='comp'; container.appendChild(p);
+        } else if(item.type === 'action' && item.name === 'startRTC'){
+          const p = document.createElement('div'); p.textContent = '[Start RTC Action]'; p.className='comp'; container.appendChild(p);
+        } else {
+          const pre = document.createElement('pre'); pre.textContent = JSON.stringify(item); pre.className='comp'; container.appendChild(pre);
+        }
+      });
+
+      document.getElementById('app').innerHTML = '';
+      document.getElementById('app').appendChild(container);
+
+      fetch('http://127.0.0.1:3000/heartbeat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({clientId,ts:Date.now()})}).catch(()=>{});
+    }catch(e){
+      document.getElementById('app').innerText='Decrypt failed: '+e.message;
+    }
+  }
+  fetchAndRender();
+  </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "name": "sendec-server",
+  "version": "1.0.0",
+  "description": "Final Sendec System - Multi-AI Quorum Security Platform with Democratic Decision Making and Real-time Monitoring",
+  "main": "final-sendec-system.js",
+  "scripts": {
+    "test": "node test-system.js",
+    "start": "node final-sendec-system.js",
+    "demo": "node final-sendec-system.js"
+  },
+  "keywords": ["ai", "security", "cryptography", "shamir-secret-sharing", "quorum", "jwt", "encryption", "multi-ai", "democratic-voting", "orchestration"],
+  "author": {
+    "name": "Benny Harianto",
+    "email": "creatoropensource@gmail.com",
+    "url": "https://www.linkedin.com/in/bennyharianto-024868383"
+  },
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.12.2",
+    "body-parser": "^2.2.0",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "node-telegram-bot-api": "^0.66.0",
+    "secrets.js-grempe": "^2.0.0"
+  }
+}

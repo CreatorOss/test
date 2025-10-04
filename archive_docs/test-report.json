@@ -1,0 +1,113 @@
+{
+  "timestamp": "2025-10-03T21:06:05.943Z",
+  "summary": {
+    "total": 17,
+    "passed": 17,
+    "failed": 0,
+    "success_rate": "100.00%"
+  },
+  "tests": [
+    {
+      "name": "Orchestrator Status API",
+      "passed": true,
+      "message": "7 services reported",
+      "timestamp": "2025-10-03T21:06:02.914Z"
+    },
+    {
+      "name": "JWT Generation",
+      "passed": true,
+      "message": "Coordinator JWT generated successfully",
+      "timestamp": "2025-10-03T21:06:02.956Z"
+    },
+    {
+      "name": "Service Health - sendec",
+      "passed": true,
+      "message": "Port 3000 responding",
+      "timestamp": "2025-10-03T21:06:03.001Z"
+    },
+    {
+      "name": "Service Health - token_sss",
+      "passed": true,
+      "message": "Port 5000 responding",
+      "timestamp": "2025-10-03T21:06:03.051Z"
+    },
+    {
+      "name": "Service Health - interpreter",
+      "passed": true,
+      "message": "Port 4001 responding",
+      "timestamp": "2025-10-03T21:06:03.107Z"
+    },
+    {
+      "name": "Service Health - guard",
+      "passed": true,
+      "message": "Port 4002 responding",
+      "timestamp": "2025-10-03T21:06:03.166Z"
+    },
+    {
+      "name": "Service Health - coordinator",
+      "passed": true,
+      "message": "Port 4003 responding",
+      "timestamp": "2025-10-03T21:06:03.225Z"
+    },
+    {
+      "name": "Service Health - selfdestruct",
+      "passed": true,
+      "message": "Port 5501 responding",
+      "timestamp": "2025-10-03T21:06:03.283Z"
+    },
+    {
+      "name": "Service Health - token_gen",
+      "passed": true,
+      "message": "Port 5502 responding",
+      "timestamp": "2025-10-03T21:06:03.362Z"
+    },
+    {
+      "name": "AI Node - coordinator Status",
+      "passed": true,
+      "message": "Node responding correctly",
+      "timestamp": "2025-10-03T21:06:03.381Z"
+    },
+    {
+      "name": "AI Node - coordinator Heartbeat",
+      "passed": true,
+      "message": "Heartbeat successful",
+      "timestamp": "2025-10-03T21:06:03.548Z"
+    },
+    {
+      "name": "AI Node - guard Status",
+      "passed": true,
+      "message": "Node responding correctly",
+      "timestamp": "2025-10-03T21:06:03.556Z"
+    },
+    {
+      "name": "AI Node - guard Heartbeat",
+      "passed": true,
+      "message": "Heartbeat successful",
+      "timestamp": "2025-10-03T21:06:03.717Z"
+    },
+    {
+      "name": "AI Node - interpreter Status",
+      "passed": true,
+      "message": "Node responding correctly",
+      "timestamp": "2025-10-03T21:06:03.729Z"
+    },
+    {
+      "name": "AI Node - interpreter Heartbeat",
+      "passed": true,
+      "message": "Heartbeat successful",
+      "timestamp": "2025-10-03T21:06:03.908Z"
+    },
+    {
+      "name": "Sendec Ephemeral Token",
+      "passed": true,
+      "message": "Token generated successfully",
+      "timestamp": "2025-10-03T21:06:03.925Z"
+    },
+    {
+      "name": "Sendec Key Fetch",
+      "passed": true,
+      "message": "Key retrieved successfully",
+      "timestamp": "2025-10-03T21:06:03.937Z"
+    }
+  ]
+}

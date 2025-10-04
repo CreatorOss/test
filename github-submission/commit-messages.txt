@@ -1,0 +1,10 @@
+COMMIT MESSAGES TO USE:
+
+Initial commit:
+"Add Sendec Security Orchestrator Agent for Qodo Challenge"
+
+Description commit:
+"Add comprehensive documentation and demo details"
+
+Final commit:
+"Complete agent submission for Best Agent for Complex Codebases category"

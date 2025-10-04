@@ -1,0 +1,95 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Final Sendec Demo</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body { background: black; color: #0f0; font-family: monospace; margin:0; height:100vh; overflow:hidden; }
+    #ui { position: absolute; right: 12px; top:12px; width:360px; background: rgba(0,0,0,0.6); padding:12px; border-radius:8px; border:1px solid #073; }
+    button { margin:6px 0; width:100%; padding:8px; background:#062; color:#bfb; border:1px solid #0a0; border-radius:6px; cursor:pointer; }
+    .status { font-size:13px; margin:6px 0; color:#9f9; }
+    .node { margin:6px 0; padding:6px; border-radius:6px; background: rgba(0,0,0,0.4); }
+    canvas { position: absolute; left:0; top:0; width:100%; height:100%; }
+    #log { height:120px; overflow:auto; background:rgba(0,0,0,0.7); padding:8px; color:#afa; font-size:12px; border-radius:6px; margin-top:8px;}
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div id="ui">
+    <h3>Sendec Final Demo</h3>
+    <div class="status">System status: <span id="systemStatus">unknown</span></div>
+    <div id="nodes"></div>
+    <button id="btnLoad">Load Protected Content</button>
+    <button id="btnAttack">Trigger Attack (demo)</button>
+    <button id="btnVote">Cast Self-Destruct Vote (demo)</button>
+    <button id="btnRotate">Force Rotate Seeds</button>
+    <div id="log"></div>
+  </div>
+
+<script>
+const logEl = document.getElementById('log');
+function log(...args){ logEl.innerHTML = new Date().toLocaleTimeString() + ' — ' + args.join(' ') + '\\n' + logEl.innerHTML; }
+
+const baseAdmin = 'http://127.0.0.1:6000';
+
+// matrix effect
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W, H, cols, y;
+function resize(){ W = canvas.width = innerWidth; H = canvas.height = innerHeight; cols = Math.floor(W/14); y = Array(cols).fill(0); }
+window.onresize = resize; resize();
+function frame(){ ctx.fillStyle = 'rgba(0,0,0,0.05)'; ctx.fillRect(0,0,W,H); ctx.fillStyle = '#0f0'; ctx.font = '13px monospace'; y.forEach((v,i)=>{ const text = String.fromCharCode(0x30A0 + Math.random()*96); ctx.fillText(text, i*14, v); if(v > H + Math.random()*10000) y[i] = 0; else y[i] = v + 14; }); requestAnimationFrame(frame); }
+requestAnimationFrame(frame);
+
+// poll status
+async function fetchStatus(){
+  try {
+    const r = await fetch(baseAdmin + '/status').then(r=>r.json());
+    document.getElementById('systemStatus').textContent = (r.services.some(s=>s.running) ? 'active' : 'destroyed');
+    const nodesDiv = document.getElementById('nodes');
+    nodesDiv.innerHTML = '';
+    r.services.forEach(s=>{
+      const d = document.createElement('div'); d.className='node';
+      d.innerHTML = `<b>${s.name}</b> (script: ${s.script})<br>port: ${s.port} — running: ${s.running} — pid: ${s.pid || '-'}`
+      nodesDiv.appendChild(d);
+    });
+  } catch(e){ console.error(e); log('status error', e.message); }
+}
+setInterval(fetchStatus, 3000); fetchStatus();
+
+// button actions
+document.getElementById('btnLoad').onclick = async ()=>{
+  // open protected shell in new tab
+  const url = window.location.origin.replace(/:.*/,'') + ':8080/index-shell.html';
+  window.open(url, '_blank');
+  log('Opened protected shell');
+};
+
+document.getElementById('btnAttack').onclick = async ()=>{
+  try{
+    await fetch(baseAdmin + '/trigger-attack', { method:'POST' });
+    log('Attack triggered');
+  }catch(e){ log('Attack failed', e.message); }
+};
+
+document.getElementById('btnVote').onclick = async ()=>{
+  try {
+    // get demo JWT for coordinator (admin API provides generator)
+    const tok = await fetch(baseAdmin + '/generate-jwt?node=coordinator').then(r=>r.json());
+    const jwt = tok.token;
+    // send vote to self-destruct quorum endpoint
+    const resp = await fetch('http://127.0.0.1:5501/self-destruct-quorum', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ nodeId:'coordinator', jwtToken: jwt })
+    }).then(r=>r.json());
+    log('Vote response: ' + JSON.stringify(resp));
+  } catch(e){ log('Vote error ' + e.message); }
+};
+
+document.getElementById('btnRotate').onclick = async ()=>{
+  try { const r = await fetch(baseAdmin + '/rotate', { method:'POST' }).then(r=>r.json()); log('Rotate: ' + JSON.stringify(r)); } catch(e){ log('Rotate failed '+e.message); }
+};
+</script>
+</body>
+</html>
